@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+       <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-130305383-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-130305383-1');
+        </script>
+
+      <!-- Basic meta info
+         ==================== -->
+      <meta charset="utf-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Clear The Cupboard Recipe Finder</title>
+      <!-- Favicon
+         ============ -->
+      <link rel="apple-touch-icon" sizes="57x57" href="images/favicon/apple-icon-57x57.png" />
+      <link rel="apple-touch-icon" sizes="60x60" href="images/favicon/apple-icon-60x60.png" />
+      <link rel="apple-touch-icon" sizes="72x72" href="images/favicon/apple-icon-72x72.png" />
+      <link rel="apple-touch-icon" sizes="76x76" href="images/favicon/apple-icon-76x76.png" />
+      <link rel="apple-touch-icon" sizes="114x114" href="images/favicon/apple-icon-114x114.png" />
+      <link rel="apple-touch-icon" sizes="120x120" href="images/favicon/apple-icon-120x120.png" />
+      <link rel="apple-touch-icon" sizes="144x144" href="images/favicon/apple-icon-144x144.png" />
+      <link rel="apple-touch-icon" sizes="152x152" href="images/favicon/apple-icon-152x152.png" />
+      <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/apple-icon-180x180.png" />
+      <link rel="icon" type="image/png" sizes="192x192" href="images/favicon/android-icon-192x192.png" />
+      <link rel="icon" type="image/png" sizes="16x16" href="images/favicon/favicon-16x16.png" />
+      <link rel="icon" type="image/png" sizes="32x32" href="images/favicon/favicon-32x32.png" />
+      <link rel="icon" type="image/png" sizes="96x96" href="images/favicon/favicon-96x96.png" />
+      <link rel="icon" type="image/x-icon" href="images/favicon/faviconT.ico">
+      <link rel="apple-touch-icon-precomposed" href="/images/favicon/trash-can-152-68.png">
+      <link rel="icon" type="image/x-icon" href="images/favicon/faviconT.ico">
+      <!-- CSS files
+         ============== -->
+      <link rel="stylesheet" type="text/css" href="css/reset.css" />
+      <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+      <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+      <link rel="stylesheet" type="text/css" href="css/animate.min.css" />
+      <link rel="stylesheet" type="text/css" href="css/styles.css" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+      <link href="css/hover.css" rel="stylesheet">
+      <!-- Modernizr file
+         =================== -->
+      <script charset="utf-8" type="text/javascript " src="js/modernizr.custom.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+       <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <script>
+          (adsbygoogle = window.adsbygoogle || []).push({
+            google_ad_client: "ca-pub-7331281358375451",
+            enable_page_level_ads: true
+          });
+        </script>
+   </head>
+   <body ng-app="myApp" ng-controller="customersCtrl">
+      <!--***** Angular Script Section****** 
+         =====================================================-->
+      <script>
+         var app = angular.module('myApp', []);
+         app.controller('customersCtrl', function($scope, $http, $timeout) {
+         
+             //DEFINE SCOPE VARIABLES
+             $scope.products = [];
+             $scope.mealtypes = [];
+             $scope.diettype = [];
+             
+             console.log($scope.foodtypes);
+             //CHECK AND LOAD ANY COOKIES SAVED
+             $scope.prodCookie = Cookies.get("prodCookie");
+             if ($scope.prodCookie != undefined) {
+                 $scope.prodCookieParsd = JSON.parse($scope.prodCookie);
+                 for (var i = 0; i < $scope.prodCookieParsd.length; i++) {
+                     if ($scope.prodCookieParsd[i] !== null) {
+                         $scope.products.push($scope.prodCookieParsd[i]);
+                     }
+                 }
+             }
+             
+             $scope.recCookie = Cookies.get("recCookie");         
+             if($scope.recCookie == undefined){
+                $( ".cardrecipes" ).css( "display", "none" );
+             }
+             
+             if ($scope.recCookie != undefined) {
+                 console.log("Cookie triggered open");
+                 $scope.reCookieParsed = JSON.parse($scope.recCookie);
+                 $scope.myData = $scope.reCookieParsed;
+                 console.log($scope.myData);
+                 showRecipes();
+             }
+         
+             //ADD INGREDIENTS TO THE PRODUCTS ARRAY
+             $scope.addItem = function(ingredient) {
+                     if ($scope.ingredient != "" && !$scope.products.includes(ingredient)) {
+                         $scope.products.push($scope.ingredient);
+                         $scope.ingredient = "";
+                     }
+                 }
+             //REMOVE INGREDIENTS FROM PRODUCTS ARRAY
+             $scope.removeItem = function(x) {
+                 $scope.products.splice(x, 1);
+                 Cookies.set("prodCookie", $scope.products);
+             }
+             
+             //ADD MEAL TYPE SEARCH PARAMETER
+             $scope.addType = function(type){
+                 if($scope.mealtypes.indexOf(type) == -1){
+                     $scope.mealtypes.push(type);
+                     console.log("Type Set:" + $scope.mealtypes);
+                     console.log($scope.mealtypes);
+                     
+                 }else{
+                     console.log("Type Removed:" + type)
+                     var deletethis = $scope.mealtypes.indexOf(type);
+                     $scope.mealtypes.splice(deletethis, 1);
+                     console.log($scope.mealtypes);
+                     
+                 }
+             }
+             
+             //ADD DIET TYPE SEARCH PARAMETER
+             $scope.addDiet = function(diet){
+                 if($scope.diettype.indexOf(diet) == -1){
+                     $scope.diettype.push(diet);
+                     console.log("Diet Set:" + $scope.diettype);
+                     console.log($scope.diettype);
+
+                 }else{
+                     
+                     console.log("Diet Removed:" + diet)
+                     var deletediet = $scope.diettype.indexOf(diet);
+                     $scope.diettype.splice(deletediet, 1);
+                     console.log($scope.diettype);
+                 }
+             } 
+             
+             /* The diet to which the recipes must be compliant. Possible values are: pescetarian, lacto vegetarian, ovo vegetarian, vegan, paleo, primal, and vegetarian. */
+         
+             //POST THE INGREDIENTS TO THE SERVER/API AND RETURN JSON CONTAINING RECIPE META DATA
+             $scope.search = function() {
+                 Cookies.set("prodCookie", $scope.products);
+                 
+                 if ($scope.products == "") {
+                     alert("Try adding some ingredients to your cutting board");
+                     return;
+                 }
+                        //http://clearthecupboard.com/api/v1/recipe/search
+                        ////http://localhost:8081/
+                 $.post("http://clearthecupboard.com/api/v1/recipe/search", {
+                     value: $scope.products, value2: $scope.mealtypes, value3: $scope.diettype
+                 }, function(data, status) {
+                     //Save returned API data to the Scope
+                     $scope.myData = data;
+                     console.log($scope.myData);
+                     //Save Search Data Returned to Cookie
+         
+                     Cookies.set("recCookie", $scope.myData);
+         
+                     //Refresh Recipes and show them after loading API data
+                     $timeout(function() {
+                         
+                         showRecipes();
+                     }, 1000);
+                 });
+             };
+         
+             //SAVE THE SELECTED RECIPE ID TO A COOKIE SO IT CAN BE ACCESSED FOR RECIPE RETRIEVAL
+             $scope.selectrecipe = function(id) {
+                 $scope.recipeID = id;
+                 Cookies.set("selRecipe", $scope.recipeID);
+             }
+         
+         });
+      </script>
+      <!-- Modal -->
+      <div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
+         <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+               <div class="modal-body text-center">
+                  <div class="loader"></div>
+                  <div clas="loader-txt">
+                     <p style="color: #666">Searching For The Best Matches!</p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!-- Splash Screen
+         ================== -->
+      <div id="splash"></div>
+      <!-- Website Video Header
+         ================= -->
+      <header>
+          <div class="overlay"></div>
+          <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop">
+            <source src="images/Shakshuka.mp4" type="video/mp4">
+          </video>
+          <div class="container h-100">
+            <div class="d-flex text-center h-100">
+              <div class="my-auto w-100 text-white">
+                <div class="container text-center titleContainer">
+                    <img class="wow bounceInLeft" src="images/logo-white.svg" style="height: 120px;"alt="logo" />
+                    <br />
+                    <h1 class="wow bounceInRight">Clear The Cupboard</h1><br><br>
+                    <h4 class="wow bounceInUp">A Recipe Finder </h4>
+                 </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+      <!-- Ingredient Input 
+         ================== -->
+      <div class="container">
+        <div class="adBanner"></div>
+         <div class="row">
+            <div class="col-lg-6">
+               <div class="card" >
+                  <div class="stepz">
+                     <span><img src="images/logo-whitesm.svg" alt="logo" /></span>
+                     <h3 style="margin-bottom: 30px;">Lets Get Started</h3>
+                     <ol>
+                        <li class="stepzli">
+                           Add the ingredients to your cutting-board
+                        </li>
+                         <li class="stepzli">
+                           Select any icons to do a specific search
+                         </li>
+                        <li class="stepzli">
+                           Hit the search button  
+                        </li>
+                        <li class="stepzli">
+                           Choose a recipe  
+                        </li>
+                        <li class="stepzli">
+                           Get Cooking !!  
+                        </li>
+                        <ul  class="stepsli" type="hint" font-weight="bold">
+                           *Hint - Press ingredients to remove them
+                        </ul>
+                     </ol>
+                  </div>
+               </div>
+            </div>
+            <!-- Parchment Section for Ingredients
+               ================================== -->
+            <div class="col-lg-6">
+                
+               <div class="card" style="background-image: url(images/cuttingboard.jpg)">
+                   <div class="overlay"></div>
+                  <div class="innercard">
+                     <h3 id="inList"><span></span>My Ingredients</h3>
+                     <ul id="inList">
+                        <li id="inListI" name="ingredient" class="h2" ng-repeat="x in products track by $index" ng-click="removeItem($index)">{{x}}</li>
+                     </ul>
+                  </div>
+                  <div class="row" id="inginput">
+                     <input style="width:75%; border-radius: 5px; opacity: .7; font-size: 18px; padding:5px;"  ng-model="ingredient" placeholder="Enter Ingredients here...">
+                     <button id="addIngredient" type="button" style="width:25%; margin-right:auto; background-color: #4CBB17; color: white" class="btn " ng-click="addItem(ingredient)"><strong>Add</strong></button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!-- Recipes Items
+         ================== -->
+      <div id="items">
+         <div class="container">
+             <div class="row">
+                 <div class="col-lg-3 col-sm-0"></div>
+                 <div class=" row col-lg-12 col-sm-12 col-md-10">
+                 
+                 <div class="span1 ">
+                    <a href=""  class="btn typeBtn foodIcons" ng-click="addDiet('vegan')">
+                        <img src="images/icons/vegan.png" style="width: 30px; height:25px;"><br>
+                        <span>Vegan</span>            
+                    </a>
+                </div>
+                <div class="span1 ">
+                    <a href=""  class="btn typeBtn foodIcons" ng-click="addDiet('pescetarian')">
+                        <img src="images/icons/fish.png" style="width: 30px; height:25px;"><br>
+                        <span>Pescetarian</span>            
+                    </a>
+                </div>
+                <div class="span1  ">
+                    <a href="" class="btn typeBtn foodIcons" ng-click="addDiet('vegetarian')">
+                        <img src="images/icons/leaf.png" style="width: 30px; height:25px;"><br>
+                        <span>Vegetarian</span>        	
+                    </a>
+                </div>
+                <div class="span1 ">
+                    <a href="" class="btn typeBtn foodIcons" ng-click="addType('breakfast')">
+                        <img src="images/icons/milk.png" style="width: 30px; height:25px;"><br>
+                        <span>Breakfast</span>       
+                    </a> 	
+                </div>
+                <div class="span1 ">
+                    <a href="" class="btn typeBtn foodIcons" ng-click="addType('appetizer')">
+                        <img src="images/icons/peanuts.png" style="width: 30px; height:25px;"><br>
+                        <span>Appetizer</span>       
+                    </a> 	
+                </div>
+                <div class="span1">
+                    <a href="" class="btn typeBtn foodIcons" ng-click="addType('main course')">
+                        <img src="images/icons/steak.png" style="width: 30px; height:25px;"><br>
+                        <span>Dinner</span>        	
+                    </a>
+                </div>
+                         
+                </div>
+                <div class="col-lg-3 col-sm-0"></div> 
+             </div>
+            <div class="row">
+               <div class="col-12">
+                  
+                  <button id="load_me_baby" ng-click="search(updateAng)" type="button" class="btn btn-labeled btn-info" style="background-color: #4CBB17">
+                     <span>
+                        <h2 style="text-align: center">Search Recipes</h2>
+                     </span>
+                  </button>
+               </div>
+            </div>
+            <div class="col-lg-12" >
+               <div class="row">
+                   <!-- Testing Section -->
+                   <div class="col-md-6 col-lg-4 ">
+                     <div class="card mb-4 text-white cardrecipes">
+                        <img class="card-img-top" src="{{ myData.img[0] }}" alt="Card image cap">
+                        <div class="card-body">
+                           <h2 class="card-title">{{ myData.title[0] }}</h2>
+                           <div class="row">
+                              <div class="col-2 text-center">
+                                 <i class="fas fa-utensils" aria-hidden="true"></i>
+                              </div>
+                              <div class="col-8">Ingredients matched</div>
+                              <div class="col-2">{{myData.Ing_used[0]}}</div>
+                           </div>
+                           
+                           <a href="recipe.html" ng-click="selectrecipe(myData.id[0])" class="btn btn-outline-light btn-lg btn-recipe">See Recipe!</a>
+                        </div>
+                     </div>
+                  </div>
+                   
+                   <div class="col-md-6 col-lg-4 ">
+                     <div class="card mb-4 text-white cardrecipes">
+                        <img class="card-img-top" src="{{ myData.img[1] }}" alt="Card image cap">
+                        <div class="card-body">
+                           <h2 class="card-title">{{ myData.title[1] }}</h2>
+                           <div class="row">
+                              <div class="col-2 text-center">
+                                 <i class="fas fa-utensils" aria-hidden="true"></i>
+                              </div>
+                              <div class="col-8">Ingredients matched</div>
+                              <div class="col-2">{{myData.Ing_used[1]}}</div>
+                           </div>
+                           
+                           <a href="recipe.html" ng-click="selectrecipe(myData.id[1])" class="btn btn-outline-light btn-lg btn-recipe">See Recipe!</a>
+                        </div>
+                     </div>
+                  </div>
+                
+                   <div class="col-md-6 col-lg-4 ">
+                     <div class="card mb-4 text-white cardrecipes">
+                        <img class="card-img-top" src="{{ myData.img[2] }}" alt="Card image cap">
+                        <div class="card-body">
+                           <h2 class="card-title">{{ myData.title[2] }}</h2>
+                           <div class="row">
+                              <div class="col-2 text-center">
+                                 <i class="fas fa-utensils" aria-hidden="true"></i>
+                              </div>
+                              <div class="col-8">Ingredients matched</div>
+                              <div class="col-2">{{myData.Ing_used[2]}}</div>
+                           </div>
+                           
+                           <a href="recipe.html" ng-click="selectrecipe(myData.id[2])" class="btn btn-outline-light btn-lg btn-recipe">See Recipe!</a>
+                        </div>
+                     </div>
+                   </div>
+                   <div class="col-md-6 col-lg-4 ">
+                     <div class="card mb-4 text-white cardrecipes">
+                        <img class="card-img-top" src="{{ myData.img[3] }}" alt="Card image cap">
+                        <div class="card-body">
+                           <h2 class="card-title">{{ myData.title[3] }}</h2>
+                           <div class="row">
+                              <div class="col-2 text-center">
+                                 <i class="fas fa-utensils" aria-hidden="true"></i>
+                              </div>
+                              <div class="col-8">Ingredients matched</div>
+                              <div class="col-2">{{myData.Ing_used[3]}}</div>
+                           </div>
+                           
+                           <a href="recipe.html" ng-click="selectrecipe(myData.id[3])" class="btn btn-outline-light btn-lg btn-recipe">See Recipe!</a>
+                        </div>
+                     </div>
+                  </div>
+                   <div class="col-md-6 col-lg-4 ">
+                     <div class="card mb-4 text-white cardrecipes">
+                        <img class="card-img-top" src="{{ myData.img[4] }}" alt="Card image cap">
+                        <div class="card-body">
+                           <h2 class="card-title">{{ myData.title[4] }}</h2>
+                           <div class="row">
+                              <div class="col-2 text-center">
+                                 <i class="fas fa-utensils" aria-hidden="true"></i>
+                              </div>
+                              <div class="col-8">Ingredients matched</div>
+                              <div class="col-2">{{myData.Ing_used[4]}}</div>
+                           </div>
+                           
+                           <a href="recipe.html" ng-click="selectrecipe(myData.id[4])" class="btn btn-outline-light btn-lg btn-recipe">See Recipe!</a>
+                        </div>
+                     </div>
+                  </div>
+                   
+                   <div class="col-md-6 col-lg-4 ">
+                     <div class="card mb-4 text-white cardrecipes">
+                        <img class="card-img-top" src="{{ myData.img[5] }}" alt="Card image cap">
+                        <div class="card-body">
+                           <h2 class="card-title">{{ myData.title[5] }}</h2>
+                           <div class="row">
+                              <div class="col-2 text-center">
+                                 <i class="fas fa-utensils" aria-hidden="true"></i>
+                              </div>
+                              <div class="col-8">Ingredients matched</div>
+                              <div class="col-2">{{myData.Ing_used[5]}}</div>
+                           </div>
+                           
+                           <a href="recipe.html" ng-click="selectrecipe(myData.id[5])" class="btn btn-outline-light btn-lg btn-recipe">See Recipe!</a>
+                        </div>
+                     </div>
+                  </div>
+                   
+
+               </div>
+            </div>
+         </div>
+      </div>
+      </div>
+      <!-- Website Footer
+         =================== -->
+      <footer>
+         <div class="container">
+            <div class="row">
+               <!-- About -->
+               <div class="col-md-6 col-sm-12 text-center">
+                  <h3>About</h3>
+                  <div class="footer-about">
+                     "Clear-The-Cupboard is a web app for using those last bits of food in your fridge and cupboard, give it a try and start finding recipes to your liking today! ”<br>
+                  </div>
+               </div><br>
+               <!-- Author -->
+               <div class="col-md-6 col-sm-12 text-center">
+                  <div class="footer-author">
+                     Made with
+                     <i class="fa fa-heart" aria-hidden="true"></i> love by<br>
+                     <a href="https://smallworldwebdevelopment.com" target="_blank">Cameron Bowler</a><br>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </footer>
+      <!-- ******* Script Section to Handle Modal  **********
+         ====================================================-->
+      <script>
+        
+         
+      </script>
+      <!-- JavaScript files
+         ===================== -->
+      <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+      <script charset="utf-8" src="js/jquery-3.3.1.min.js"></script>
+      <script charset="utf-8" src="js/bootstrap.min.js"></script>
+      <script charset="utf-8" src="js/wow.min.js"></script>
+      <script charset="utf-8" src="js/scripts.js"></script>
+   </body>
+</html>
